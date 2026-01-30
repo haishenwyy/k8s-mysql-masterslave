@@ -1,0 +1,16 @@
+# 使用 kubectl apply -k . 一键部署
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: mysql
+resources:
+  - namespace.yaml
+  - secret.yaml
+  - mysql-master-configmap.yaml
+  - mysql-master-service.yaml
+  - mysql-master-statefulset.yaml
+  - mysql-slave-configmap.yaml
+  - mysql-slave-service.yaml
+  - mysql-slave-statefulset.yaml
+  - mysql-master-svc-external.yaml
+  - mysql-slave-svc-external.yaml
+  # replication-job 需在 Master/Slave 就绪后手动执行

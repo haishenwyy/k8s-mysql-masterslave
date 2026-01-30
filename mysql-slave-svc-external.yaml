@@ -1,0 +1,16 @@
+# 可选：供应用访问 Slave 的 ClusterIP Service（读操作）
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-slave-svc
+  namespace: mysql
+  labels:
+    app: mysql-slave
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+      name: mysql
+  selector:
+    app: mysql-slave
