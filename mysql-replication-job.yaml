@@ -42,13 +42,13 @@ spec:
               echo "Master Log File: $MASTER_LOG_FILE, Position: $MASTER_LOG_POS"
               
               echo "Waiting for MySQL Slave to be ready..."
-              until mysql -h mysql-slave.mysql.svc.cluster.local -u root -p${MYSQL_ROOT_PASSWORD} -e "SELECT 1" &>/dev/null; do
+              until mysql -h mysql-slave.mysql.svc.cluster.local -u root -p"${MYSQL_ROOT_PASSWORD}" -e "SELECT 1" &>/dev/null; do
                 echo "Slave not ready, waiting..."
                 sleep 5
               done
               
               echo "Configuring Slave replication..."
-              mysql -h mysql-slave.mysql.svc.cluster.local -u root -p${MYSQL_ROOT_PASSWORD} -e "
+              mysql -h mysql-slave.mysql.svc.cluster.local -u root -p"${MYSQL_ROOT_PASSWORD}" -e "
                 STOP SLAVE;
                 RESET SLAVE ALL;
                 CHANGE MASTER TO
@@ -62,7 +62,7 @@ spec:
               "
               
               echo "Verifying replication status..."
-              mysql -h mysql-slave.mysql.svc.cluster.local -u root -p${MYSQL_ROOT_PASSWORD} -e "SHOW SLAVE STATUS\G"
+              mysql -h mysql-slave.mysql.svc.cluster.local -u root -p"${MYSQL_ROOT_PASSWORD}" -e "SHOW SLAVE STATUS\G"
               
               echo "Replication setup completed successfully!"
           env:

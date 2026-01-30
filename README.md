@@ -11,6 +11,8 @@
 | `mysql-replication-job.yaml` | 配置主从复制的 Job |
 | `mysql-*-svc-external.yaml` | 可选，供应用访问的 ClusterIP Service |
 | `argocd-application.yaml` | Argo CD Application 定义（用于 GitOps 部署） |
+| `mysql-slave-init-configmap.yaml` | Slave 初始化脚本，确保 root 密码与 Secret 一致 |
+| `redeploy.sh` / `redeploy.ps1` | 重新部署脚本 |
 
 ## 部署步骤
 
@@ -56,6 +58,17 @@ kubectl apply -f mysql-replication-job.yaml
 ```bash
 kubectl apply -k .
 # 等待 Pod 就绪后，replication-job 会自动执行（已包含在 kustomization 中）
+```
+
+### 3.1 重新部署（修改配置后）
+
+```bash
+# Linux / macOS / Git Bash
+chmod +x redeploy.sh
+./redeploy.sh
+
+# Windows PowerShell
+.\redeploy.ps1
 ```
 
 ### 4. 使用 Argo CD 部署（GitOps）

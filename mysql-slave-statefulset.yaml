@@ -37,6 +37,8 @@ spec:
               mountPath: /var/lib/mysql
             - name: mysql-config
               mountPath: /etc/mysql/conf.d
+            - name: mysql-init
+              mountPath: /docker-entrypoint-initdb.d
           resources:
             requests:
               memory: "512Mi"
@@ -68,5 +70,9 @@ spec:
         - name: mysql-config
           configMap:
             name: mysql-slave-config
+        - name: mysql-init
+          configMap:
+            name: mysql-slave-init
+            defaultMode: 0755
         - name: mysql-data
           emptyDir: {}

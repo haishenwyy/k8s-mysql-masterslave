@@ -9,6 +9,7 @@ resources:
   - mysql-master-service.yaml
   - mysql-master-statefulset.yaml
   - mysql-slave-configmap.yaml
+  - mysql-slave-init-configmap.yaml
   - mysql-slave-service.yaml
   - mysql-slave-statefulset.yaml
   - mysql-master-svc-external.yaml
