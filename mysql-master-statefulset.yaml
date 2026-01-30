@@ -3,6 +3,8 @@ kind: StatefulSet
 metadata:
   name: mysql-master
   namespace: mysql
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   serviceName: mysql-master
   replicas: 1

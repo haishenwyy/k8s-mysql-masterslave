@@ -10,6 +10,7 @@
 | `mysql-slave-*.yaml` | Slave 节点：ConfigMap、Service、StatefulSet |
 | `mysql-replication-job.yaml` | 配置主从复制的 Job |
 | `mysql-*-svc-external.yaml` | 可选，供应用访问的 ClusterIP Service |
+| `argocd-application.yaml` | Argo CD Application 定义（用于 GitOps 部署） |
 
 ## 部署步骤
 
@@ -50,13 +51,42 @@ kubectl wait --for=condition=ready pod -l app=mysql-slave -n mysql --timeout=300
 kubectl apply -f mysql-replication-job.yaml
 ```
 
-### 3. 使用 Kustomize 一键部署（不含 replication-job）
+### 3. 使用 Kustomize 一键部署
 
 ```bash
 kubectl apply -k .
-# 等待 Pod 就绪后手动执行
-kubectl apply -f mysql-replication-job.yaml
+# 等待 Pod 就绪后，replication-job 会自动执行（已包含在 kustomization 中）
 ```
+
+### 4. 使用 Argo CD 部署（GitOps）
+
+1. **推送代码到 Git 仓库**，确保 Argo CD 能访问该仓库。
+
+2. **确认 `argocd-application.yaml`** 中的 `source.repoURL` 已配置为：
+   ```yaml
+   source:
+     repoURL: https://github.com/haishenwyy/k8s-mysql-masterslave.git
+     path: .
+     targetRevision: main
+   ```
+
+3. **Secret 管理**：生产环境不建议将密码提交到 Git。可选方案：
+   - 使用 [External Secrets Operator](https://external-secrets.io/) 或 [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) 管理密码
+   - 首次部署前手动创建 Secret：`kubectl apply -f secret.yaml -n mysql`（不纳入 Git）
+
+4. **创建 Argo CD Application**：
+   ```bash
+   kubectl apply -f argocd-application.yaml
+   ```
+
+5. **Sync Wave 部署顺序**（已配置）：
+   - Wave -1: Namespace
+   - Wave 0: Secret、ConfigMap、Service
+   - Wave 1: Master StatefulSet
+   - Wave 2: Slave StatefulSet、ClusterIP Service
+   - Wave 3: Replication Job（Master/Slave 就绪后自动执行）
+
+6. Argo CD 将自动同步、自愈并清理已移除资源（`prune: true`, `selfHeal: true`）。
 
 ## 验证复制状态
 
@@ -78,3 +108,4 @@ kubectl exec -it mysql-slave-0 -n mysql -- mysql -u root -p -e "SHOW SLAVE STATU
 2. **多 Slave**：修改 `mysql-slave-statefulset.yaml` 中 `replicas` 及每个 Slave 的 `server-id`
 3. **MySQL 8.0**：使用 `mysql_native_password` 以兼容部分客户端
 4. **生产环境**：建议使用更安全的 Secret 管理方式（如 External Secrets、Sealed Secrets）
+5. **Argo CD**：Replication Job 完成后会被 TTL 清理；若 Argo CD 检测到漂移会重新创建并执行，主从配置会重新应用（幂等）

@@ -5,6 +5,8 @@ kind: Job
 metadata:
   name: mysql-replication-setup
   namespace: mysql
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   ttlSecondsAfterFinished: 86400  # 完成后保留 24 小时便于查看日志
   backoffLimit: 10

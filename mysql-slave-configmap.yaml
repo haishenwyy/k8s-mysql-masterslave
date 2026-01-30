@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: mysql-slave-config
   namespace: mysql
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 data:
   my.cnf: |
     [mysqld]

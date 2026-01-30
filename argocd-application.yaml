@@ -1,0 +1,30 @@
+# Argo CD Application - MySQL 主从复制
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mysql-master-slave
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/haishenwyy/k8s-mysql-masterslave.git
+    path: .
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mysql
+  syncPolicy:
+    automated:
+      prune: true      # 删除 Git 中已移除的资源
+      selfHeal: true   # 自动修复集群中的漂移
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

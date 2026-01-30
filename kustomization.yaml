@@ -13,4 +13,4 @@ resources:
   - mysql-slave-statefulset.yaml
   - mysql-master-svc-external.yaml
   - mysql-slave-svc-external.yaml
-  # replication-job 需在 Master/Slave 就绪后手动执行
+  - mysql-replication-job.yaml  # Argo CD 通过 sync-wave 在 Master/Slave 就绪后自动执行

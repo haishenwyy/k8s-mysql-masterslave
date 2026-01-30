@@ -5,6 +5,8 @@ metadata:
   namespace: mysql
   labels:
     app: mysql-master
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   ports:
     - port: 3306
