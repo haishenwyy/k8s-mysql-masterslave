@@ -11,20 +11,21 @@ data:
     #!/bin/bash
     set -e
     echo "Setting root password consistent with Secret..."
+    # Slave 配置了 read_only，需先临时关闭才能执行 ALTER USER
+    SQL_SETUP="
+      SET GLOBAL read_only=0;
+      SET GLOBAL super_read_only=0;
+      ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
+      CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
+      GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+      FLUSH PRIVILEGES;
+      SET GLOBAL read_only=1;
+      SET GLOBAL super_read_only=1;
+    "
     # 先尝试带密码连接（root 已有密码），再尝试无密码（root 未设置密码）
-    if mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "
-      ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
-      CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
-      GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
-      FLUSH PRIVILEGES;
-    " 2>/dev/null; then
+    if mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "$SQL_SETUP" 2>/dev/null; then
       echo "Root password set (connected with existing password)"
-    elif mysql -uroot -e "
-      ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
-      CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
-      GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
-      FLUSH PRIVILEGES;
-    " 2>/dev/null; then
+    elif mysql -uroot -e "$SQL_SETUP" 2>/dev/null; then
       echo "Root password set (connected without password)"
     else
       echo "Failed to set root password"
