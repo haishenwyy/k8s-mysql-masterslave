@@ -13,6 +13,7 @@
 | `argocd-application.yaml` | Argo CD Application 定义（用于 GitOps 部署） |
 | `mysql-slave-init-configmap.yaml` | Slave 初始化脚本，确保 root 密码与 Secret 一致 |
 | `redeploy.sh` / `redeploy.ps1` | 重新部署脚本 |
+| `undeploy.sh` / `undeploy.ps1` | 一键删除脚本 |
 
 ## 部署步骤
 
@@ -69,6 +70,17 @@ chmod +x redeploy.sh
 
 # Windows PowerShell
 .\redeploy.ps1
+```
+
+### 3.2 一键删除
+
+```bash
+# Linux / macOS / Git Bash
+chmod +x undeploy.sh
+./undeploy.sh
+
+# Windows PowerShell
+.\undeploy.ps1
 ```
 
 ### 4. 使用 Argo CD 部署（GitOps）
